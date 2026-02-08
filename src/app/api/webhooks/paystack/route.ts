@@ -5,6 +5,8 @@ import Order from "@/models/Order";
 import { Resend } from "resend";
 import { OrderEmail } from "@/components/emails/OrderEmail";
 
+export const dynamic = "force-dynamic";
+
 // Initialize Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
 
