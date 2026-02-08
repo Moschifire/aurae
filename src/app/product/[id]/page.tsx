@@ -1,7 +1,8 @@
 import { connectToDB } from "@/lib/db";
 import Product from "@/models/Product";
 import Image from "next/image";
-import { Heart, ShoppingBag, ShieldCheck, Truck } from "lucide-react";
+import { ShieldCheck, Truck } from "lucide-react";
+import ProductActions from "@/components/ProductActions"; // Add this import
 
 export default async function ProductDetails({ params }: { params: Promise<{ id: string }> }) {
   await connectToDB();
@@ -9,6 +10,9 @@ export default async function ProductDetails({ params }: { params: Promise<{ id:
   const product = await Product.findById(id);
 
   if (!product) return <div className="pt-40 text-center">Product not found</div>;
+
+  // Convert MongoDB doc to a plain JavaScript object for the Client Component
+  const plainProduct = JSON.parse(JSON.stringify(product));
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-20">
@@ -33,15 +37,8 @@ export default async function ProductDetails({ params }: { params: Promise<{ id:
           <div className="border-t border-stone-100 pt-8 mb-8">
             <p className="text-stone-600 leading-relaxed mb-8">{product.description}</p>
             
-            {/* Action Buttons */}
-            <div className="flex gap-4 mb-10">
-              <button className="flex-1 bg-stone-900 text-white py-4 rounded-full flex items-center justify-center gap-2 hover:bg-stone-800 transition">
-                <ShoppingBag size={18} /> Add to Cart
-              </button>
-              <button className="w-14 h-14 border border-stone-200 rounded-full flex items-center justify-center hover:bg-stone-50 transition text-stone-600">
-                <Heart size={20} />
-              </button>
-            </div>
+            {/* Action Buttons Component */}
+            <ProductActions product={plainProduct} />
 
             {/* Trust Markers */}
             <div className="space-y-4 pt-6 border-t border-stone-100">

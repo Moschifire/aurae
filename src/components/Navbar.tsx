@@ -2,9 +2,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShoppingBag, Heart, User } from "lucide-react";
+import { useWishlist } from "@/context/WishlistContext"; // Import our hook
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { wishlist } = useWishlist(); // Access wishlist data
 
   // Don't show the main navbar on admin pages
   if (pathname.startsWith("/admin") || pathname === "/login") return null;
@@ -35,11 +37,21 @@ export default function Navbar() {
 
         {/* Icons */}
         <div className="flex gap-5 items-center">
-          <Link href="/wishlist"><Heart size={20} className="text-stone-700" /></Link>
+          {/* Wishlist Link with dynamic count */}
+          <Link href="/wishlist" className="relative">
+            <Heart size={20} className="text-stone-700" />
+            {wishlist.length > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] w-3 h-3 flex items-center justify-center rounded-full">
+                {wishlist.length}
+              </span>
+            )}
+          </Link>
+
           <Link href="/cart" className="relative">
             <ShoppingBag size={20} className="text-stone-700" />
             <span className="absolute -top-1 -right-1 bg-black text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">0</span>
           </Link>
+          
           <Link href="/login"><User size={20} className="text-stone-700" /></Link>
         </div>
       </div>
