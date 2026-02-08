@@ -2,53 +2,116 @@ import { connectToDB } from "@/lib/db";
 import Product from "@/models/Product";
 import Image from "next/image";
 import Link from "next/link";
-import { use } from "react";
+import { ShoppingBag } from "lucide-react";
+
+// 1. Define the unique content for each branch
+const categoryDetails: Record<string, { title: string; dbName: string; desc: string }> = {
+  skin: { 
+    title: "AuraéSkin", 
+    dbName: "AuraéSkin",
+    desc: "Scientific precision meets botanical soul. High-performance skincare for a radiant tomorrow." 
+  },
+  beauty: { 
+    title: "AuraéBeauty", 
+    dbName: "AuraéBeauty",
+    desc: "Effortless color and texture designed for the modern minimalist. Beauty that breathes." 
+  },
+  adorn: { 
+    title: "AuraéAdorn", 
+    dbName: "AuraéAdorn",
+    desc: "Curated jewelry, glasses, and accessories. The final touch to a perfectly composed look." 
+  },
+  living: { 
+    title: "AuraéLiving", 
+    dbName: "AuraéLiving",
+    desc: "Transform your space into a sanctuary with our curated home essentials and scents." 
+  },
+};
 
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
-  await connectToDB();
+  // 2. Await params (Required in Next.js 15)
   const { category } = await params;
+  const info = categoryDetails[category];
 
-  // Map the URL (skin) to the DB category (AuraéSkin)
-  const categoryMap: any = {
-    skin: "AuraéSkin",
-    beauty: "AuraéBeauty",
-    adorn: "AuraéAdorn",
-    living: "AuraéLiving",
-  };
+  // If the category in the URL is invalid (e.g., /shop/shoes), handle gracefully
+  if (!info) {
+    return (
+      <div className="pt-40 text-center font-serif italic text-stone-500">
+        Collection not found.
+      </div>
+    );
+  }
 
-  const dbCategory = categoryMap[category];
-  const products = await Product.find({ category: dbCategory });
+  // 3. Fetch data from MongoDB
+  await connectToDB();
+  const products = await Product.find({ category: info.dbName }).sort({ createdAt: -1 });
 
   return (
-    <div className="max-w-7xl mx-auto py-20 px-6">
-      <header className="text-center mb-16">
-        <h1 className="text-5xl font-serif mb-4">{dbCategory}</h1>
-        <p className="text-stone-500 uppercase text-xs tracking-[0.2em] italic">Curated for your lifestyle</p>
+    <div className="max-w-7xl mx-auto py-20 px-6 min-h-screen">
+      {/* Dynamic Luxury Header */}
+      <header className="max-w-3xl mb-24">
+        <p className="text-[10px] uppercase tracking-[0.4em] text-stone-400 mb-4 font-bold">
+          The Auraé Collection
+        </p>
+        <h1 className="text-6xl md:text-7xl font-serif mb-6 text-stone-900 tracking-tighter">
+          {info.title}
+        </h1>
+        <p className="text-stone-500 text-lg md:text-xl font-light leading-relaxed">
+          {info.desc}
+        </p>
       </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
-        {products.map((product) => (
-          <Link href={`/product/${product._id}`} key={product._id} className="group">
-            <div className="aspect-[3/4] relative bg-stone-100 overflow-hidden mb-4">
-              <Image 
-                src={product.images[0]} 
-                alt={product.name} 
-                fill 
-                className="object-cover transition-transform duration-500 group-hover:scale-105" 
-              />
-              <button className="absolute bottom-4 left-4 right-4 bg-white/90 py-3 text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all">
-                Quick Add
-              </button>
-            </div>
-            <h3 className="text-sm font-medium">{product.name}</h3>
-            <p className="text-stone-500 text-xs mt-1">₦{product.price.toLocaleString()}</p>
+      {/* Product Grid */}
+      {products.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
+          {products.map((product) => (
+            <Link 
+              href={`/product/${product._id}`} 
+              key={product._id.toString()} 
+              className="group block"
+            >
+              {/* Product Image Container */}
+              <div className="aspect-[3/4] relative bg-stone-50 overflow-hidden mb-6 rounded-sm border border-stone-100/50">
+                <Image 
+                  src={product.images[0] || "/placeholder.jpg"} 
+                  alt={product.name} 
+                  fill 
+                  className="object-cover transition-transform duration-700 group-hover:scale-105" 
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                />
+                
+                {/* Subtle Hover Action */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center">
+                  <div className="bg-white/90 px-6 py-3 text-[10px] uppercase tracking-widest opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 flex items-center gap-2 shadow-sm font-bold">
+                    <ShoppingBag size={12} /> View Details
+                  </div>
+                </div>
+              </div>
+
+              {/* Product Meta */}
+              <div className="space-y-1">
+                <h3 className="text-sm font-medium text-stone-900 group-hover:text-stone-600 transition-colors">
+                  {product.name}
+                </h3>
+                <p className="text-stone-500 text-xs font-light tracking-wide uppercase">
+                   {info.title}
+                </p>
+                <p className="text-stone-900 text-sm font-semibold pt-1">
+                  ₦{product.price.toLocaleString()}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        /* Empty State */
+        <div className="text-center py-40 border-t border-stone-100">
+          <p className="text-stone-400 font-serif italic text-lg mb-4">
+            New items arriving soon to {info.title}.
+          </p>
+          <Link href="/" className="text-[10px] uppercase tracking-widest border-b border-stone-900 pb-1 font-bold">
+            Explore other Collections
           </Link>
-        ))}
-      </div>
-      
-      {products.length === 0 && (
-        <div className="text-center py-20 border-t border-dashed border-stone-200">
-          <p className="text-stone-400 font-serif italic">New items arriving soon to {dbCategory}.</p>
         </div>
       )}
     </div>
