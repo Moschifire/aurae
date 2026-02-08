@@ -22,5 +22,5 @@ const OrderSchema = new Schema({
   orderStatus: { type: String, default: "Processing" }, // Processing, Shipped, Delivered
 }, { timestamps: true });
 
-const Order = models.Order || model("Order", OrderSchema);
+const Order = mongoose.models.Order || mongoose.model("Order", OrderSchema);
 export default Order;
