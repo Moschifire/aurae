@@ -1,6 +1,9 @@
 import { connectToDB } from "@/lib/db";
 import Order from "@/models/Order";
 
+export const dynamic = "force-dynamic"; // This forces a fresh DB fetch on every visit
+export const revalidate = 0; // Ensures no data is cached
+
 export default async function AdminOrdersPage() {
   await connectToDB();
   const orders = await Order.find().sort({ createdAt: -1 });
