@@ -33,7 +33,7 @@ export async function POST(req: Request) {
         amount: amount * 100,
         callback_url: `${process.env.NEXTAUTH_URL}/checkout/success`,
         metadata: {
-          orderId: newOrder._id, // Save our DB Order ID in Paystack metadata
+          orderId: newOrder._id.toString(), // Save our DB Order ID in Paystack metadata
         },
       }),
     });
