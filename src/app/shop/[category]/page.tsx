@@ -28,6 +28,18 @@ const categoryDetails: Record<string, { title: string; dbName: string; desc: str
   },
 };
 
+export async function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
+  const { category } = await params;
+  
+  // Capitalize first letter
+  const title = category.charAt(0).toUpperCase() + category.slice(1);
+  
+  return {
+    title: `Auraé${title}`,
+    description: `Shop the latest in Auraé${title}. Curated pieces for your lifestyle.`
+  };
+}
+
 export default async function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   // 2. Await params (Required in Next.js 15)
   const { category } = await params;

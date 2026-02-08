@@ -4,6 +4,16 @@ import Image from "next/image";
 import { ShieldCheck, Truck } from "lucide-react";
 import ProductActions from "@/components/ProductActions"; // Add this import
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const product = await fetch(`${process.env.NEXTAUTH_URL}/api/products/${id}`).then(res => res.json());
+
+  return {
+    title: product.name,
+    description: product.description,
+  };
+}
+
 export default async function ProductDetails({ params }: { params: Promise<{ id: string }> }) {
   await connectToDB();
   const { id } = await params;
